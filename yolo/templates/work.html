@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block title %}检测{% endblock %}
+{% block head %}
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        h2 {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+
+        .btn-custom {
+            background-color: #007bff;
+            color: white;
+            border-radius: 25px;
+            padding: 10px 30px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            border: none;
+        }
+
+        .btn-custom:hover {
+            background-color: #0056b3;
+        }
+
+        .file-upload-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin-bottom: 30px;
+        }
+
+        .file-upload-wrapper input[type="file"] {
+            display: none;
+        }
+
+        .file-upload-wrapper label {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .img-preview {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .instructions {
+            margin-top: 40px;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        .btn-disable {
+            background-color: grey;
+            cursor: not-allowed;
+        }
+    </style>
+{% endblock %}
+
+{% block main %}
+    <div id="all-page" style="display: inline">
+        <div class="container">
+            <h2>图片检测平台</h2>
+            <form id="upload-form" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="file-upload-wrapper">
+                    <input type="file" accept="image/*" name="pic" id="pic-file">
+                    <label for="pic-file">选择图片</label>
+                    <img src="#" id="img-preview" class="img-preview" alt="预览图像" style="display:none;">
+                </div>
+                <button type="button" class="btn btn-custom" onclick="confirmUpload()">确认上传</button>
+            </form>
+
+            <div class="instructions">
+                <h2>用户使用说明</h2>
+                <p>
+                    用户可以通过点击“选择图片”按钮来上传本地图片，点击“确认上传”后，图片会显示在页面上。注意：您需要登录后才能进行检测操作。
+                </p>
+            </div>
+
+            <div class="text-center" style="margin-top: 50px;">
+                <button type="button" class="btn btn-custom" onclick="save_Forecast()">开始检测</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 图片预览功能
+        document.getElementById('pic-file').onchange = function (evt) {
+            const [file] = this.files;
+            if (file) {
+                const imgPreview = document.getElementById('img-preview');
+                imgPreview.src = URL.createObjectURL(file);
+                imgPreview.style.display = 'block';
+            }
+        };
+
+        // 确认上传并通过Ajax上传图片
+        function confirmUpload() {
+            const fileInput = document.getElementById('pic-file');
+            const imgPreview = document.getElementById('img-preview');
+
+            if (!fileInput.files.length) {
+                alert("请选择一张图片进行上传");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('pic', fileInput.files[0]);
+
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch('/save_picture/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        imgPreview.style.display = 'block';
+                        alert("图片上传成功");
+                    } else {
+                        alert("图片上传失败，请重试");
+                    }
+                })
+                .catch(error => {
+                    console.error('上传失败:', error);
+                    alert("图片上传失败，请重试");
+                });
+        }
+
+        function save_Forecast() {
+            console.log("save_Forecast function called");
+            const picFile = document.getElementById("pic-file").files[0];
+            console.log(picFile);
+            const allPage = document.getElementById("all-page");
+            console.log(allPage);
+            if (!picFile) {
+                alert("请先选择一张图片。");
+                allPage.style.display = "inline";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('pic', picFile);
+
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            console.log("CSRF token:", csrftoken);
+
+            $.ajax({
+                url: '/save_forecast/',
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    console.log("AJAX success:", data);
+                    allPage.style.display = "inline";
+                    if (data['status']) {
+                        alert(data['status']);
+                        window.location.href = "/work/";
+                    } else if (data['path']) {
+                        window.location.href = data['path'];
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("AJAX error:", status, error);
+                    allPage.style.display = "inline";
+                    alert("预测失败,请重新预测/上传");
+                }
+            });
+        }
+    </script>
+{% endblock %}

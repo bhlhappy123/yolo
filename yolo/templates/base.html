@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}旋转目标检测</title>
+    <link rel="stylesheet" href="{% static 'bootstrap5/bootstrap.min.css' %}">
+    <script src="{% static 'bootstrap5/popper.min.js' %}"></script>
+    <script src="{% static 'bootstrap5/bootstrap.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+    <script src="{% static 'js/wow.min.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        new WOW().init();
+    </script>
+    <style>
+        .navbar-custom {
+            background: url("{% static 'image/background.jpg' %}") no-repeat center center;
+            background-size: cover;
+            padding: 30px 0;
+        }
+
+        .navbar-custom .navbar-brand, .navbar-custom .nav-link {
+            color: #fff !important;
+        }
+
+        .navbar-custom .nav-link:hover {
+            color: #ffc107 !important;
+            transition: color 0.3s ease-in-out;
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body>
+<header class="navbar-custom mb-3">
+    <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+            <span class="fs-4 m-lg-2">旋转目标检测</span>
+
+            <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                <li class="nav-item">
+                    <a href="/" class="nav-link active px-2 text-white">介绍</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/work" class="nav-link px-2 text-white">检测</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link px-2 text-white">2</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link px-2 text-white">3</a>
+                </li>
+            </ul>
+
+            {% if user.is_authenticated %}
+                <div class="dropdown text-end">
+                    <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="{% static 'image/avatar.webp' %}" alt="mdo" width="32" height="32"
+                             class="rounded-circle">
+                    </a>
+                    <ul class="dropdown-menu text-small">
+                        <li><a class="dropdown-item" href="{% url 'login' %}">退出登录</a></li>
+                    </ul>
+                </div>
+            {% else %}
+                <div class="text-end">
+                    <a href="{% url 'login' %}" type="button" class="btn btn-outline-light me-2">登录</a>
+                    <a href="{% url 'register' %}" type="button" class="btn btn-warning">注册</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</header>
+<main class="container bg-white p-3 rounded">
+    {% block main %}
+    {% endblock %}
+</main>
+<script>
+    {#jQuery.noConflict();#}
+    {#jQuery(document).ready(function ($) {#}
+    {#    $(".scroll").click(function (event) {#}
+    {#        event.preventDefault();#}
+    {#        $('html,body').animate({scrollTop: $(this.hash).offset().top}, 1000);#}
+    //    });
+    // });
+</script>
+</body>
+</html>
